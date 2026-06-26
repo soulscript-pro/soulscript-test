@@ -1,0 +1,895 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=3.0">
+<title>SOULSCRIPT — Archives de l'Âme</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&family=Cormorant+SC:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+:root{
+  --g:#C89B5B;--gh:#E8CC7A;--gl:#7A5C2A;
+  --tx:#D8C8A8;--txs:rgba(216,200,168,.82);--txd:rgba(216,200,168,.48);
+  --bg:#060402;
+}
+body{background:var(--bg);color:var(--tx);font-family:'Cormorant Garamond',serif;-webkit-font-smoothing:antialiased;overflow-x:hidden;padding-bottom:56px;}
+
+/* GRAIN */
+body::after{content:'';position:fixed;inset:0;z-index:9000;pointer-events:none;opacity:.025;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");background-size:160px;}
+
+/* KEYFRAMES */
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+@keyframes breathe{0%,100%{opacity:.55}50%{opacity:.9}}
+@keyframes glow{0%,100%{box-shadow:0 0 20px rgba(200,155,91,.08)}50%{box-shadow:0 0 40px rgba(200,155,91,.2),0 0 80px rgba(200,155,91,.06)}}
+@keyframes shimmer{0%{background-position:-300% center}100%{background-position:300% center}}
+@keyframes sealRotate{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+@keyframes dustRise{0%{opacity:0;transform:translateY(0) translateX(0) scale(0)}12%{opacity:.8}80%{opacity:.25}100%{opacity:0;transform:translateY(-110px) translateX(var(--dx,15px)) scale(1.2)}}
+@keyframes flicker{0%,100%{opacity:.7;transform:scaleY(1)}30%{opacity:.9;transform:scaleY(1.06)}60%{opacity:.65;transform:scaleY(.96)}}
+@keyframes reveal{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+
+/* TOPBAR */
+#topbar{position:sticky;top:0;z-index:600;background:rgba(4,2,1,.97);border-bottom:1px solid rgba(200,155,91,.1);}
+.tb-wrap{display:flex;align-items:center;padding:9px 22px 8px;position:relative;}
+.tb-burger{background:none;border:none;cursor:pointer;opacity:.4;color:var(--g);transition:opacity .3s;}
+.tb-burger:hover{opacity:.8;}
+.tb-logo{position:absolute;left:50%;transform:translateX(-50%);text-align:center;}
+.tb-name{font-family:'Cinzel',serif;font-size:clamp(11px,3.5vw,15px);letter-spacing:8px;color:var(--g);text-shadow:0 0 30px rgba(200,155,91,.18);}
+.tb-sub{font-family:'Cormorant SC',serif;font-size:6px;letter-spacing:5px;color:var(--gl);margin-top:1px;}
+.tb-right{margin-left:auto;display:flex;align-items:center;gap:5px;text-decoration:none;opacity:.45;transition:opacity .3s;}
+.tb-right:hover{opacity:.85;}
+.tb-right-lbl{font-family:'Cormorant SC',serif;font-size:5.5px;letter-spacing:2px;color:var(--gl);text-align:right;line-height:1.5;}
+.tb-nav{display:flex;justify-content:center;height:24px;border-top:1px solid rgba(200,155,91,.06);}
+.tb-nav a{font-family:'Cormorant SC',serif;font-size:7px;letter-spacing:4px;color:rgba(200,155,91,.28);text-decoration:none;text-transform:uppercase;padding:0 14px;height:24px;display:flex;align-items:center;transition:color .3s;}
+.tb-nav a:hover{color:rgba(200,155,91,.6);}
+.tb-nav a.act{color:rgba(200,155,91,.75);}
+
+/* SÉPARATEUR SCEAU */
+.sep{display:flex;align-items:center;justify-content:center;padding:44px 0;background:var(--bg);position:relative;}
+.sep::before,.sep::after{content:'';position:absolute;top:50%;left:0;right:0;height:1px;background:linear-gradient(to right,transparent,rgba(200,155,91,.12),transparent);}
+.sep-icon{position:relative;z-index:2;background:var(--bg);padding:0 14px;display:flex;align-items:center;justify-content:center;}
+.sep-icon svg{animation:sealRotate 80s linear infinite;}
+
+/* SECTION FADE */
+.s-fade{position:relative;}
+.s-fade::before{content:'';position:absolute;top:0;left:0;right:0;height:70px;z-index:4;pointer-events:none;background:linear-gradient(to bottom,var(--bg),transparent);}
+.s-fade::after{content:'';position:absolute;bottom:0;left:0;right:0;height:70px;z-index:4;pointer-events:none;background:linear-gradient(to top,var(--bg),transparent);}
+
+/* REVEAL AU SCROLL */
+.reveal{opacity:0;transform:translateY(16px);transition:opacity .9s ease,transform .9s ease;}
+.reveal.vis{opacity:1;transform:translateY(0);}
+.reveal-left{opacity:0;transform:translateX(-16px);transition:opacity .9s ease,transform .9s ease;}
+.reveal-left.vis{opacity:1;transform:translateX(0);}
+
+/* ══════════════════════════════
+   LIEU 1 — VIDÉO PLEIN ÉCRAN
+══════════════════════════════ */
+#lieu1{position:relative;width:100%;height:100svh;min-height:100svh;overflow:hidden;background:#060402;}
+#heroVideo{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;}
+.l1-vignette{position:absolute;inset:0;z-index:1;background:radial-gradient(ellipse at 50% 45%,transparent 25%,rgba(4,2,1,.6) 100%);pointer-events:none;}
+.l1-fade-bot{position:absolute;bottom:0;left:0;right:0;height:40%;z-index:2;background:linear-gradient(to top,rgba(6,4,2,1) 0%,transparent 100%);pointer-events:none;}
+#heroBtn{
+  position:absolute;bottom:clamp(76px,11svh,130px);left:50%;transform:translateX(-50%) translateY(12px);
+  z-index:10;opacity:0;text-align:center;width:88%;max-width:360px;
+  transition:opacity 1s ease,transform 1s ease;
+}
+.hero-btn-link{
+  display:inline-flex;align-items:center;justify-content:center;gap:10px;
+  width:100%;padding:16px 28px;
+  background:linear-gradient(180deg,rgba(200,155,91,.07),rgba(200,155,91,.03));
+  border:1px solid rgba(200,155,91,.35);border-top-color:rgba(200,155,91,.55);
+  box-shadow:0 1px 0 rgba(200,155,91,.1) inset,0 4px 20px rgba(0,0,0,.4);
+  font-family:'Cinzel',serif;font-size:8.5px;letter-spacing:6px;
+  color:var(--g);text-transform:uppercase;text-decoration:none;
+  position:relative;overflow:hidden;
+  animation:glow 6s ease-in-out infinite;
+}
+.hero-btn-link::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(200,155,91,.06),transparent);pointer-events:none;}
+
+/* ══════════════════════════════
+   LIEU 2 — LE HALL DES GARDIENS
+══════════════════════════════ */
+#lieu2{position:relative;overflow:hidden;min-height:min(95svh,800px);display:flex;align-items:center;justify-content:center;}
+.l2-bg{position:absolute;inset:0;background:url('scene-lions.png') center/cover no-repeat;}
+.l2-overlay{position:absolute;inset:0;background:linear-gradient(to bottom,rgba(6,4,2,.72) 0%,rgba(6,4,2,.06) 18%,transparent 35%,transparent 60%,rgba(6,4,2,.18) 78%,rgba(6,4,2,.88) 100%),linear-gradient(to right,rgba(6,4,2,.55) 0%,transparent 14%,transparent 86%,rgba(6,4,2,.55) 100%);}
+.l2-runes{position:absolute;inset:0;pointer-events:none;overflow:hidden;z-index:1;}
+.l2-lieu{position:absolute;top:22px;left:50%;transform:translateX(-50%);font-family:'Cormorant SC',serif;font-size:7.5px;letter-spacing:7px;color:rgba(200,155,91,.3);text-transform:uppercase;white-space:nowrap;z-index:5;}
+.l2-card{
+  position:relative;z-index:10;width:min(400px,80vw);
+  background:rgba(4,2,1,.9);border:1px solid rgba(200,155,91,.28);
+  padding:34px 28px 28px;text-align:center;
+  animation:glow 8s ease-in-out infinite;
+  opacity:0;transform:translateY(14px);transition:opacity .9s ease,transform .9s ease;
+}
+.l2-card.vis{opacity:1;transform:translateY(0);}
+.l2-card::before{content:'';position:absolute;top:8px;left:8px;width:14px;height:14px;border-top:1px solid rgba(200,155,91,.35);border-left:1px solid rgba(200,155,91,.35);}
+.l2-card::after{content:'';position:absolute;bottom:8px;right:8px;width:14px;height:14px;border-bottom:1px solid rgba(200,155,91,.35);border-right:1px solid rgba(200,155,91,.35);}
+.l2-c1{position:absolute;top:8px;right:8px;width:14px;height:14px;border-top:1px solid rgba(200,155,91,.35);border-right:1px solid rgba(200,155,91,.35);}
+.l2-c2{position:absolute;bottom:8px;left:8px;width:14px;height:14px;border-bottom:1px solid rgba(200,155,91,.35);border-left:1px solid rgba(200,155,91,.35);}
+.l2-eyebrow{font-family:'Cormorant SC',serif;font-size:6.5px;letter-spacing:5px;color:var(--gl);text-transform:uppercase;margin-bottom:14px;}
+.l2-quote{font-family:'Cormorant Garamond',serif;font-size:clamp(14px,2.2vw,18px);font-style:italic;color:var(--txs);line-height:1.75;margin-bottom:20px;}
+.l2-quote em{color:var(--gh);font-style:normal;}
+.l2-sep{display:flex;align-items:center;gap:10px;margin-bottom:18px;}
+.l2-sep::before,.l2-sep::after{content:'';flex:1;height:1px;background:rgba(200,155,91,.14);}
+.l2-sep span{font-size:7px;color:rgba(200,155,91,.28);}
+.l2-cta{display:flex;align-items:center;justify-content:center;gap:9px;width:100%;padding:13px 14px;background:rgba(200,155,91,.07);border:1px solid rgba(200,155,91,.3);font-family:'Cinzel',serif;font-size:7.5px;letter-spacing:5px;color:var(--g);text-transform:uppercase;cursor:pointer;text-decoration:none;transition:all .4s;}
+.l2-cta:hover{background:rgba(200,155,91,.15);border-color:rgba(200,155,91,.55);}
+
+/* ══════════════════════════════
+   LIEU 3 — LA GRANDE BIBLIOTHÈQUE
+══════════════════════════════ */
+#lieu3{position:relative;overflow:hidden;}
+.l3-banner{position:relative;overflow:hidden;height:min(58svh,520px);}
+.l3-banner img{width:100%;height:100%;object-fit:cover;object-position:center;display:block;}
+.l3-banner-ov{position:absolute;inset:0;background:linear-gradient(to bottom,rgba(6,4,2,.65) 0%,rgba(6,4,2,.06) 20%,transparent 40%,transparent 58%,rgba(6,4,2,.18) 78%,rgba(6,4,2,.88) 100%),linear-gradient(to right,rgba(6,4,2,.45) 0%,transparent 12%,transparent 88%,rgba(6,4,2,.45) 100%);}
+.l3-lieu{position:absolute;top:50%;left:8%;transform:translateY(-50%);z-index:3;}
+.l3-lieu-name{font-family:'Cinzel',serif;font-size:clamp(11px,2vw,15px);letter-spacing:6px;color:rgba(200,155,91,.38);text-transform:uppercase;margin-bottom:6px;}
+.l3-lieu-line{width:50px;height:1px;background:linear-gradient(to right,rgba(200,155,91,.35),transparent);}
+.l3-citation{position:absolute;bottom:0;right:8%;z-index:3;padding:0 0 22px;max-width:360px;text-align:right;}
+.l3-cit{font-family:'Cormorant Garamond',serif;font-size:clamp(13px,1.8vw,15px);font-style:italic;color:rgba(216,200,168,.6);line-height:1.7;}
+.l3-bg{position:relative;background:radial-gradient(ellipse at 50% 50%,rgba(20,12,3,.6) 0%,transparent 60%),var(--bg);}
+.l3-bg-img{position:absolute;inset:0;background:url('img-bibliotheque.jpg') center/cover no-repeat;opacity:.1;filter:sepia(.5) saturate(.5);}
+.l3-content{position:relative;z-index:2;padding:52px 20px 56px;max-width:1100px;margin:0 auto;}
+.l3-header{text-align:center;margin-bottom:36px;}
+.l3-ey{display:flex;align-items:center;justify-content:center;gap:10px;font-family:'Cormorant SC',serif;font-size:7px;letter-spacing:6px;color:var(--gl);text-transform:uppercase;margin-bottom:8px;}
+.l3-ey::before,.l3-ey::after{content:'';width:28px;height:1px;background:rgba(200,155,91,.18);}
+.l3-title{font-family:'Cinzel',serif;font-size:clamp(13px,2.4vw,18px);letter-spacing:5px;color:var(--g);text-transform:uppercase;margin-bottom:5px;}
+.l3-sub{font-family:'Cormorant Garamond',serif;font-size:13.5px;font-style:italic;color:var(--txd);}
+.l3-grid{display:grid;grid-template-columns:repeat(3,1fr);border:1px solid rgba(200,155,91,.12);}
+.l3-col{border-right:1px solid rgba(200,155,91,.12);}
+.l3-col:last-child{border-right:none;}
+.l3-col-h{padding:11px 14px;border-bottom:1px solid rgba(200,155,91,.12);background:rgba(200,155,91,.03);text-align:center;font-family:'Cinzel',serif;font-size:7px;letter-spacing:3px;color:rgba(200,155,91,.45);text-transform:uppercase;}
+.l3-row{padding:11px 13px;border-bottom:1px solid rgba(200,155,91,.06);display:flex;gap:9px;transition:background .25s;}
+.l3-row:last-child{border-bottom:none;}
+.l3-row:hover{background:rgba(200,155,91,.03);}
+.l3-n{font-family:'Cinzel',serif;font-size:10px;color:var(--gl);flex-shrink:0;width:14px;line-height:1.6;}
+.l3-name{font-family:'Cinzel',serif;font-size:7px;letter-spacing:1.5px;color:var(--tx);text-transform:uppercase;margin-bottom:2px;}
+.l3-ast{font-family:'Cormorant Garamond',serif;font-size:10.5px;color:var(--txd);line-height:1.5;}
+
+/* ══════════════════════════════
+   LIEU 4 — LES ARCHIVES SONT OUVERTES
+══════════════════════════════ */
+#lieu4{position:relative;overflow:hidden;}
+.l4-bg{position:absolute;inset:0;background:url('img-bibliotheque.jpg') center/cover no-repeat;opacity:.1;filter:sepia(.5) saturate(.5);}
+.l4-bg-ov{position:absolute;inset:0;background:linear-gradient(to bottom,rgba(6,4,2,.7),rgba(6,4,2,.55),rgba(6,4,2,.85));}
+.l4-inner{position:relative;z-index:2;max-width:780px;margin:0 auto;padding:88px 24px 96px;}
+.l4-eyebrow{display:flex;align-items:center;justify-content:center;gap:10px;font-family:'Cormorant SC',serif;font-size:7px;letter-spacing:6px;color:rgba(200,155,91,.35);text-transform:uppercase;margin-bottom:18px;}
+.l4-eyebrow::before,.l4-eyebrow::after{content:'';width:28px;height:1px;background:rgba(200,155,91,.2);}
+.l4-title{font-family:'Cinzel',serif;font-size:clamp(26px,5vw,46px);font-weight:400;letter-spacing:3px;color:var(--gh);text-transform:uppercase;text-align:center;line-height:1.15;margin-bottom:28px;}
+.l4-intro{font-family:'Cormorant Garamond',serif;font-size:clamp(15px,2vw,17px);color:var(--txs);line-height:2;text-align:center;margin-bottom:28px;}
+.l4-intro strong{color:var(--tx);font-weight:500;}
+.l4-bloc{border:1px solid rgba(200,155,91,.12);padding:20px 24px;background:rgba(200,155,91,.025);margin-bottom:22px;position:relative;}
+.l4-bloc::after{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(to right,transparent,rgba(200,155,91,.28),transparent);}
+.l4-bloc-title{font-family:'Cinzel',serif;font-size:7px;letter-spacing:4px;color:rgba(200,155,91,.45);text-transform:uppercase;margin-bottom:12px;display:flex;align-items:center;gap:7px;justify-content:center;}
+.l4-bloc-title::before,.l4-bloc-title::after{content:'';flex:1;height:1px;background:rgba(200,155,91,.1);}
+.l4-li{display:flex;align-items:flex-start;gap:10px;font-family:'Cormorant Garamond',serif;font-size:clamp(13px,1.8vw,15px);color:var(--txs);line-height:1.7;margin-bottom:6px;}
+.l4-li:last-child{margin-bottom:0;}
+.l4-star{color:var(--gl);font-size:7.5px;margin-top:5px;flex-shrink:0;}
+.l4-delai{border:1px solid rgba(200,155,91,.1);padding:17px 20px;display:flex;gap:14px;align-items:flex-start;background:rgba(200,155,91,.02);margin-bottom:22px;}
+.l4-delai-lbl{font-family:'Cinzel',serif;font-size:7px;letter-spacing:4px;color:rgba(200,155,91,.4);text-transform:uppercase;margin-bottom:3px;}
+.l4-delai-val{font-family:'Cinzel',serif;font-size:clamp(19px,3vw,26px);letter-spacing:3px;color:var(--gh);line-height:1;margin-bottom:4px;}
+.l4-delai-desc{font-family:'Cormorant Garamond',serif;font-size:13px;font-style:italic;color:var(--txd);line-height:1.6;}
+.l4-final{padding:14px 0;border-top:1px solid rgba(200,155,91,.07);border-bottom:1px solid rgba(200,155,91,.07);font-family:'Cormorant Garamond',serif;font-size:clamp(14px,2vw,16px);font-style:italic;color:rgba(200,155,91,.52);text-align:center;line-height:1.75;}
+.l4-final em{color:var(--gh);font-style:normal;}
+
+/* ══════════════════════════════
+   LIEU 5 — LA DALLE + INVESTISSEMENT + DÉTAILS
+══════════════════════════════ */
+#lieu5{padding:88px 0 96px;position:relative;overflow:hidden;background:radial-gradient(ellipse at 50% 0%,rgba(35,20,5,.4) 0%,transparent 55%),var(--bg);}
+.l5-header{max-width:640px;margin:0 auto 60px;text-align:center;padding:0 24px;}
+.l5-eyebrow{display:flex;align-items:center;justify-content:center;gap:10px;font-family:'Cormorant SC',serif;font-size:7px;letter-spacing:6px;color:rgba(200,155,91,.35);text-transform:uppercase;margin-bottom:12px;}
+.l5-eyebrow::before,.l5-eyebrow::after{content:'';width:28px;height:1px;background:rgba(200,155,91,.2);}
+.l5-phrase{font-family:'Cormorant Garamond',serif;font-size:clamp(17px,2.8vw,23px);font-style:italic;color:var(--txs);line-height:1.72;}
+.l5-phrase em{color:var(--gh);font-style:normal;}
+/* Dalle */
+.l5-dalle{position:relative;width:100%;margin-bottom:64px;}
+.l5-dalle-fade-t{position:absolute;top:0;left:0;right:0;height:55px;background:linear-gradient(to bottom,var(--bg),transparent);z-index:2;pointer-events:none;}
+.l5-dalle-fade-b{position:absolute;bottom:0;left:0;right:0;height:55px;background:linear-gradient(to top,var(--bg),transparent);z-index:2;pointer-events:none;}
+.l5-dalle img{width:100%;max-width:1100px;display:block;margin:0 auto;}
+/* Investissement */
+.l5-invest{
+  max-width:560px;margin:0 auto 64px;padding:0 24px;text-align:center;
+}
+.l5-invest-wrap{
+  position:relative;padding:48px 32px 44px;
+  background:rgba(200,155,91,.02);
+  border:1px solid rgba(200,155,91,.18);
+  border-top:none;
+}
+.l5-invest-wrap::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(to right,transparent,rgba(200,155,91,.5),transparent);}
+.l5-invest-wrap::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;background:linear-gradient(to right,transparent,rgba(200,155,91,.25),transparent);}
+/* Coins ornementaux */
+.l5-invest-wrap .c1{position:absolute;top:10px;left:10px;width:14px;height:14px;border-top:1px solid rgba(200,155,91,.3);border-left:1px solid rgba(200,155,91,.3);}
+.l5-invest-wrap .c2{position:absolute;top:10px;right:10px;width:14px;height:14px;border-top:1px solid rgba(200,155,91,.3);border-right:1px solid rgba(200,155,91,.3);}
+.l5-invest-wrap .c3{position:absolute;bottom:10px;left:10px;width:14px;height:14px;border-bottom:1px solid rgba(200,155,91,.3);border-left:1px solid rgba(200,155,91,.3);}
+.l5-invest-wrap .c4{position:absolute;bottom:10px;right:10px;width:14px;height:14px;border-bottom:1px solid rgba(200,155,91,.3);border-right:1px solid rgba(200,155,91,.3);}
+.l5-invest-lbl{font-family:'Cormorant SC',serif;font-size:7px;letter-spacing:7px;color:rgba(200,155,91,.38);text-transform:uppercase;margin-bottom:16px;}
+.l5-invest-price{font-family:'Cinzel',serif;font-size:clamp(44px,9vw,72px);font-weight:400;color:var(--gh);letter-spacing:2px;line-height:1;text-shadow:0 0 60px rgba(200,155,91,.2);margin-bottom:6px;}
+.l5-invest-currency{font-size:.4em;vertical-align:super;color:var(--g);}
+.l5-invest-sep{display:flex;align-items:center;gap:12px;margin:18px 0;}
+.l5-invest-sep::before,.l5-invest-sep::after{content:'';flex:1;height:1px;background:rgba(200,155,91,.12);}
+.l5-invest-sep span{font-size:7px;color:rgba(200,155,91,.25);}
+.l5-invest-detail{font-family:'Cormorant Garamond',serif;font-size:clamp(12px,1.7vw,14px);font-style:italic;color:var(--txd);line-height:1.9;letter-spacing:.5px;}
+.l5-invest-detail strong{color:rgba(200,155,91,.55);font-style:normal;font-weight:400;display:block;font-family:'Cinzel',serif;font-size:7px;letter-spacing:4px;text-transform:uppercase;margin-bottom:2px;}
+/* Détails section */
+.l5-details{max-width:580px;margin:0 auto;padding:0 24px;}
+.l5-det-title{font-family:'Cinzel',serif;font-size:clamp(10px,1.6vw,13px);letter-spacing:5px;color:rgba(200,155,91,.45);text-transform:uppercase;text-align:center;margin-bottom:28px;display:flex;align-items:center;justify-content:center;gap:10px;}
+.l5-det-title::before,.l5-det-title::after{content:'✦';font-size:6px;color:var(--gl);}
+.l5-det-item{display:flex;gap:20px;align-items:flex-start;padding:20px 0;border-bottom:1px solid rgba(200,155,91,.07);}
+.l5-det-item:last-child{border-bottom:none;}
+.l5-det-ico{flex-shrink:0;width:40px;height:40px;border:1px solid rgba(200,155,91,.15);border-radius:50%;display:flex;align-items:center;justify-content:center;background:rgba(200,155,91,.03);}
+.l5-det-body{}
+.l5-det-name{font-family:'Cinzel',serif;font-size:clamp(11px,1.6vw,13px);letter-spacing:3px;color:var(--gh);text-transform:uppercase;margin-bottom:5px;}
+.l5-det-desc{font-family:'Cormorant Garamond',serif;font-size:clamp(13px,1.8vw,15px);font-style:italic;color:var(--txs);line-height:1.75;}
+
+/* ══════════════════════════════
+   LIEU 6 — FORMULAIRE
+══════════════════════════════ */
+#lieu6{position:relative;overflow:hidden;}
+.l6-porte{position:relative;overflow:hidden;height:min(40svh,380px);}
+.l6-porte img{width:100%;height:100%;object-fit:cover;object-position:center 30%;display:block;}
+.l6-porte-ov{position:absolute;inset:0;background:linear-gradient(to bottom,rgba(6,4,2,.6) 0%,rgba(6,4,2,.05) 25%,transparent 45%,transparent 55%,rgba(6,4,2,.1) 75%,rgba(6,4,2,.92) 100%);}
+.l6-porte-quote{position:absolute;bottom:0;left:0;right:0;padding:16px 24px 24px;z-index:3;text-align:center;}
+.l6-pq{font-family:'Cormorant Garamond',serif;font-size:clamp(14px,2vw,18px);font-style:italic;color:rgba(216,200,168,.7);line-height:1.7;}
+.l6-form-section{background:var(--bg);}
+.l6-form-inner{max-width:640px;margin:0 auto;padding:52px 24px 60px;}
+.l6-form-lieu{font-family:'Cormorant SC',serif;font-size:7px;letter-spacing:6px;color:rgba(200,155,91,.28);text-transform:uppercase;margin-bottom:5px;text-align:center;}
+.l6-form-title{font-family:'Cinzel',serif;font-size:clamp(14px,2.5vw,20px);letter-spacing:4px;color:var(--gh);text-transform:uppercase;margin-bottom:4px;text-align:center;}
+.l6-form-sub{font-family:'Cormorant Garamond',serif;font-size:13.5px;font-style:italic;color:var(--txd);margin-bottom:32px;text-align:center;}
+/* Champs */
+.fg{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;}
+.frow{display:flex;flex-direction:column;gap:5px;}
+.frow.full{grid-column:1/-1;}
+.flbl{font-family:'Cormorant SC',serif;font-size:6.5px;letter-spacing:4px;color:var(--gl);text-transform:uppercase;}
+.finp{background:rgba(200,155,91,.03);border:1px solid rgba(200,155,91,.1);border-bottom:1px solid rgba(200,155,91,.2);padding:12px 14px;width:100%;font-family:'Cormorant Garamond',serif;font-size:14.5px;color:var(--tx);outline:none;transition:border-color .35s,background .35s,box-shadow .35s;}
+.finp::placeholder{color:rgba(216,200,168,.15);font-style:italic;}
+.finp:focus{border-color:rgba(200,155,91,.32);border-bottom-color:rgba(200,155,91,.58);background:rgba(200,155,91,.05);box-shadow:0 3px 16px rgba(200,155,91,.06),inset 0 -1px 0 rgba(200,155,91,.25);}
+select.finp{cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='rgba(200%2C155%2C91%2C.5)' stroke-width='1.5' fill='none'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:36px;-webkit-appearance:none;appearance:none;}
+select.finp option{background:#0c0804;color:var(--tx);}
+.f-error{font-family:'Cormorant SC',serif;font-size:6.5px;letter-spacing:2px;color:rgba(200,80,80,.7);text-transform:uppercase;margin-top:2px;display:none;}
+.f-hint{font-family:'Cormorant Garamond',serif;font-size:11.5px;font-style:italic;color:rgba(216,200,168,.3);margin-top:3px;}
+.finp.invalid{border-color:rgba(200,80,80,.35);}
+.ville-wrap{position:relative;}
+#ville-suggestions{position:absolute;top:100%;left:0;right:0;z-index:200;background:rgba(10,6,2,.98);border:1px solid rgba(200,155,91,.2);border-top:none;display:none;max-height:180px;overflow-y:auto;}
+#ville-suggestions li{list-style:none;padding:9px 13px;cursor:pointer;font-family:'Cormorant Garamond',serif;font-size:13.5px;color:var(--txs);border-bottom:1px solid rgba(200,155,91,.06);transition:background .2s;}
+#ville-suggestions li:hover{background:rgba(200,155,91,.08);color:var(--gh);}
+.fsubmit{width:100%;padding:17px;margin-top:8px;background:linear-gradient(135deg,rgba(200,155,91,.82),rgba(170,125,55,.68));border:none;cursor:pointer;font-family:'Cinzel',serif;font-size:8.5px;letter-spacing:7px;color:#060402;text-transform:uppercase;font-weight:700;display:flex;align-items:center;justify-content:center;gap:10px;transition:opacity .35s,box-shadow .35s;position:relative;overflow:hidden;}
+.fsubmit::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,.07),transparent);pointer-events:none;}
+.fsubmit:hover{opacity:.88;box-shadow:0 0 40px rgba(200,155,91,.18);}
+.fsec{display:flex;align-items:center;justify-content:center;gap:6px;margin-top:10px;font-family:'Cormorant SC',serif;font-size:6.5px;letter-spacing:3px;color:rgba(216,200,168,.2);text-transform:uppercase;}
+#f-success{display:none;text-align:center;padding:22px 16px;border:1px solid rgba(200,155,91,.22);background:rgba(200,155,91,.04);font-family:'Cormorant Garamond',serif;font-size:15px;font-style:italic;color:var(--gh);line-height:1.9;margin-top:10px;}
+
+/* ══════════════════════════════
+   LIVRE — CONCLUSION
+══════════════════════════════ */
+#livre{position:relative;overflow:hidden;border-top:1px solid rgba(200,155,91,.1);}
+.livre-glow{position:absolute;top:10%;left:50%;transform:translateX(-50%);width:min(240px,42%);height:min(240px,42%);border-radius:50%;background:radial-gradient(circle,rgba(255,200,80,.1),rgba(200,155,91,.04),transparent);pointer-events:none;z-index:1;animation:breathe 8s ease-in-out infinite;}
+.livre-dust{position:absolute;inset:0;pointer-events:none;z-index:2;}
+.livre-wrap{position:relative;max-height:min(92svh,820px);overflow:hidden;display:flex;align-items:center;justify-content:center;}
+.livre-img{width:100%;max-width:820px;display:block;margin:0 auto;opacity:0;transform:scale(.97);transition:opacity 1.3s ease,transform 1.5s ease;}
+.livre-img.vis{opacity:1;transform:scale(1);}
+.livre-caption{position:relative;z-index:3;text-align:center;padding:32px 22px 52px;background:linear-gradient(to bottom,transparent,rgba(6,4,2,.95) 28%,rgba(6,4,2,1) 100%);margin-top:-55px;}
+.livre-cap-title{font-family:'Cinzel',serif;font-size:clamp(9px,1.6vw,12px);letter-spacing:7px;color:rgba(200,155,91,.4);text-transform:uppercase;margin-bottom:10px;opacity:0;transition:opacity .9s .3s ease,transform .9s .3s ease;transform:translateY(8px);}
+.livre-cap-title.vis{opacity:1;transform:translateY(0);}
+.livre-cap-text{font-family:'Cormorant Garamond',serif;font-size:clamp(16px,2.4vw,21px);font-style:italic;color:var(--txs);line-height:1.75;opacity:0;transition:opacity .9s .55s ease,transform .9s .55s ease;transform:translateY(10px);}
+.livre-cap-text.vis{opacity:1;transform:translateY(0);}
+.livre-cap-text em{color:var(--gh);font-style:normal;}
+/* Devise */
+.devise{text-align:center;padding:28px 24px 48px;border-top:1px solid rgba(200,155,91,.07);}
+.devise-text{font-family:'Cormorant SC',serif;font-size:clamp(9px,1.5vw,11px);letter-spacing:4px;color:rgba(200,155,91,.3);line-height:2.2;}
+
+/* ══ NAV MOBILE ══ */
+#mobnav{display:none;position:fixed;bottom:0;left:0;right:0;height:56px;z-index:700;background:rgba(4,2,1,.99);border-top:1px solid rgba(200,155,91,.1);}
+.mn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;border:none;background:none;cursor:pointer;border-right:1px solid rgba(200,155,91,.07);text-decoration:none;padding:4px 0;}
+.mn:last-child{border-right:none;}
+.mn.act{background:rgba(200,155,91,.06);}
+.mn-ico{display:flex;align-items:center;justify-content:center;opacity:.38;width:22px;height:20px;transition:opacity .3s;}
+.mn.act .mn-ico,.mn:hover .mn-ico{opacity:1;}
+.mn-lbl{font-family:'Cormorant SC',serif;font-size:5.5px;letter-spacing:2px;color:rgba(200,155,91,.25);text-transform:uppercase;}
+.mn.act .mn-lbl{color:var(--g);}
+
+/* RESPONSIVE */
+@media(max-width:720px){
+  body{padding-bottom:56px;}
+  #mobnav{display:flex;}
+  .tb-nav{display:none;}
+  .l3-grid{grid-template-columns:1fr;}
+  .l3-col{border-right:none;border-bottom:1px solid rgba(200,155,91,.1);}
+  .l3-col:last-child{border-bottom:none;}
+  .l3-content{padding:36px 14px 40px;}
+  .l3-lieu{display:none;}
+  .fg{grid-template-columns:1fr;}
+  .l6-form-inner{padding:38px 16px 70px;}
+  .l5-invest-wrap{padding:36px 20px 32px;}
+  .l5-invest-price{font-size:clamp(40px,12vw,60px);}
+}
+@media(pointer:coarse){
+  #topbar{backdrop-filter:none;-webkit-backdrop-filter:none;}
+  .l2-card{backdrop-filter:none;-webkit-backdrop-filter:none;background:rgba(4,2,1,.96);}
+}
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<header id="topbar">
+  <div class="tb-wrap">
+    <button class="tb-burger" aria-label="Menu">
+      <svg width="20" height="14" viewBox="0 0 20 14" fill="none"><rect y="0" width="20" height="1.5" rx=".75" fill="currentColor"/><rect y="6.25" width="20" height="1.5" rx=".75" fill="currentColor"/><rect y="12.5" width="20" height="1.5" rx=".75" fill="currentColor"/></svg>
+    </button>
+    <div class="tb-logo">
+      <div class="tb-name">SOULSCRIPT</div>
+      <div class="tb-sub">Archives de l'Âme</div>
+    </div>
+    <a href="#lieu6" class="tb-right">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+      <div class="tb-right-lbl">Mon<br>Dossier</div>
+    </a>
+  </div>
+  <nav class="tb-nav">
+    <a href="/">Accueil</a>
+    <a href="#">Aelys</a>
+    <a href="#" class="act">Archives</a>
+    <a href="#">Nessar</a>
+    <a href="#">Oréon</a>
+  </nav>
+</header>
+
+<!-- ══ LIEU 1 — VIDÉO ══ -->
+<section id="lieu1">
+  <video id="heroVideo" autoplay muted loop playsinline preload="metadata">
+    <source src="gardien-archives-1.mp4" type="video/mp4">
+  </video>
+  <div class="l1-vignette"></div>
+  <div class="l1-fade-bot"></div>
+  <div id="heroBtn">
+    <a href="#lieu2" class="hero-btn-link">
+      <svg width="11" height="12" viewBox="0 0 12 14" fill="rgba(200,155,91,.85)"><path d="M9 6V4a3 3 0 0 0-6 0v2H1v8h10V6H9zm-4 0V4a1 1 0 0 1 2 0v2H5z"/></svg>
+      Accéder à Mon Dossier
+    </a>
+  </div>
+</section>
+
+<!-- SÉPARATEUR -->
+<div class="sep">
+  <div class="sep-icon">
+    <svg width="36" height="36" viewBox="0 0 80 80" fill="none"><circle cx="40" cy="40" r="35" stroke="rgba(200,155,91,.22)" stroke-width=".8"/><circle cx="40" cy="40" r="26" stroke="rgba(200,155,91,.14)" stroke-width=".6"/><circle cx="40" cy="40" r="4" fill="rgba(200,155,91,.4)"/><path d="M40,5 L43,36 L40,40 L37,36Z" fill="rgba(200,155,91,.55)"/><path d="M40,75 L43,44 L40,40 L37,44Z" fill="rgba(200,155,91,.35)"/><path d="M5,40 L36,37 L40,40 L36,43Z" fill="rgba(200,155,91,.35)"/><path d="M75,40 L44,37 L40,40 L44,43Z" fill="rgba(200,155,91,.55)"/><line x1="40" y1="5" x2="40" y2="75" stroke="rgba(200,155,91,.07)" stroke-width=".5"/><line x1="5" y1="40" x2="75" y2="40" stroke="rgba(200,155,91,.07)" stroke-width=".5"/></svg>
+  </div>
+</div>
+
+<!-- ══ LIEU 2 — HALL DES GARDIENS ══ -->
+<section id="lieu2" class="s-fade">
+  <div class="l2-bg"></div>
+  <div class="l2-overlay"></div>
+  <div class="l2-runes" id="hallRunes"></div>
+  <div class="l2-lieu">✦ &nbsp; Le Hall des Gardiens &nbsp; ✦</div>
+  <div class="l2-card" id="l2card">
+    <div class="l2-c1"></div><div class="l2-c2"></div>
+    <div class="l2-eyebrow">— Le Lion des Archives —</div>
+    <p class="l2-quote">"Les gardiens vous ont montré<br>leurs fragments de vérité.<br><em>Moi, je vous montrerai l'histoire entière.</em>"</p>
+    <div class="l2-sep"><span>✦</span></div>
+    <a href="#lieu6" class="l2-cta">
+      <svg width="11" height="12" viewBox="0 0 12 14" fill="rgba(200,155,91,.85)"><path d="M9 6V4a3 3 0 0 0-6 0v2H1v8h10V6H9zm-4 0V4a1 1 0 0 1 2 0v2H5z"/></svg>
+      Continuer vers mon Dossier
+    </a>
+  </div>
+</section>
+
+<!-- SÉPARATEUR -->
+<div class="sep">
+  <div class="sep-icon">
+    <svg width="36" height="36" viewBox="0 0 80 80" fill="none"><circle cx="40" cy="40" r="35" stroke="rgba(200,155,91,.2)" stroke-width=".8"/><circle cx="40" cy="40" r="25" stroke="rgba(200,155,91,.12)" stroke-width=".6"/><circle cx="40" cy="40" r="5" stroke="rgba(200,155,91,.38)" stroke-width="1" fill="rgba(200,155,91,.07)"/><circle cx="40" cy="40" r="2" fill="rgba(200,155,91,.5)"/><line x1="40" y1="5" x2="40" y2="15" stroke="rgba(200,155,91,.4)" stroke-width="1.2"/><line x1="40" y1="65" x2="40" y2="75" stroke="rgba(200,155,91,.4)" stroke-width="1.2"/><line x1="5" y1="40" x2="15" y2="40" stroke="rgba(200,155,91,.4)" stroke-width="1.2"/><line x1="65" y1="40" x2="75" y2="40" stroke="rgba(200,155,91,.4)" stroke-width="1.2"/><path d="M40,40 L54,30" stroke="rgba(200,155,91,.38)" stroke-width="1"/><path d="M40,40 L32,53" stroke="rgba(200,155,91,.28)" stroke-width=".8"/><text x="40" y="23" font-family="serif" font-size="9" fill="rgba(200,155,91,.28)" text-anchor="middle">♃</text><text x="40" y="62" font-family="serif" font-size="9" fill="rgba(200,155,91,.25)" text-anchor="middle">♄</text></svg>
+  </div>
+</div>
+
+<!-- ══ LIEU 3 — LA GRANDE BIBLIOTHÈQUE ══ -->
+<section id="lieu3" class="s-fade">
+  <div class="l3-banner reveal" id="l3banner">
+    <img src="img-bibliotheque.jpg" alt="La Grande Bibliothèque des Archives" loading="lazy" decoding="async">
+    <div class="l3-banner-ov"></div>
+    <div class="l3-lieu">
+      <div class="l3-lieu-name">La Grande Bibliothèque</div>
+    <div style="font-family:'Cormorant SC',serif;font-size:6px;letter-spacing:4px;color:rgba(200,155,91,.22);text-transform:uppercase;margin-top:6px;">Deuxième Salle</div>
+      <div class="l3-lieu-line"></div>
+    </div>
+    <div class="l3-citation"><div class="l3-cit">"Chaque dossier est un volume unique<br>dans la Bibliothèque de votre âme."</div></div>
+  </div>
+  <div class="l3-bg">
+    <div class="l3-bg-img"></div>
+    <div class="l3-content">
+      <div class="l3-header reveal" id="l3header">
+        <div class="l3-ey">Votre lecture complète</div>
+        <div class="l3-title">Votre Lecture SOULSCRIPT — 12 Thèmes</div>
+        <div class="l3-sub">Chaque thème est analysé individuellement à partir de votre architecture natale.</div>
+      </div>
+      <!-- Dalle gravée à la place du tableau -->
+      <div class="reveal" id="dalleSection" style="position:relative;margin-top:8px;">
+        <div style="position:absolute;top:0;left:0;right:0;height:50px;background:linear-gradient(to bottom,var(--bg),transparent);z-index:2;pointer-events:none;"></div>
+        <div style="position:absolute;bottom:0;left:0;right:0;height:50px;background:linear-gradient(to top,var(--bg),transparent);z-index:2;pointer-events:none;"></div>
+        <picture>
+          <source srcset="img-dalle.webp" type="image/webp">
+          <img src="img-dalle.jpg" alt="Les douze révélations gravées dans la pierre par les Gardiens des Archives" loading="lazy" decoding="async" style="width:100%;max-width:1100px;display:block;margin:0 auto;">
+        </picture>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SÉPARATEUR -->
+<div class="sep">
+  <div class="sep-icon">
+    <svg width="36" height="36" viewBox="0 0 80 80" fill="none"><circle cx="40" cy="40" r="35" stroke="rgba(200,155,91,.2)" stroke-width=".8"/><circle cx="40" cy="40" r="27" stroke="rgba(200,155,91,.1)" stroke-width=".5"/><ellipse cx="40" cy="38" rx="13" ry="15" fill="rgba(120,75,25,.12)" stroke="rgba(200,155,91,.22)" stroke-width=".7"/><ellipse cx="35" cy="34" rx="3" ry="2.5" fill="rgba(200,155,91,.38)"/><ellipse cx="45" cy="34" rx="3" ry="2.5" fill="rgba(200,155,91,.38)"/><ellipse cx="35" cy="34" rx="1.5" ry="2" fill="rgba(10,5,1,.8)"/><ellipse cx="45" cy="34" rx="1.5" ry="2" fill="rgba(10,5,1,.8)"/><path d="M37.5,39 Q40,37 42.5,39 Q40,42 37.5,39Z" fill="rgba(200,155,91,.38)"/><line x1="40" y1="5" x2="40" y2="12" stroke="rgba(200,155,91,.3)" stroke-width=".8"/><line x1="40" y1="68" x2="40" y2="75" stroke="rgba(200,155,91,.3)" stroke-width=".8"/><line x1="5" y1="40" x2="12" y2="40" stroke="rgba(200,155,91,.3)" stroke-width=".8"/><line x1="68" y1="40" x2="75" y2="40" stroke="rgba(200,155,91,.3)" stroke-width=".8"/></svg>
+  </div>
+</div>
+
+<!-- TEXTE NARRATIF — entre bibliothèque et archives ouvertes -->
+<div style="max-width:640px;margin:0 auto;padding:0 28px 12px;text-align:center;" class="reveal" id="texteNarratif">
+  <!-- Accroche -->
+  <p style="font-family:'Cormorant SC',serif;font-size:clamp(11px,1.7vw,13px);letter-spacing:5px;color:rgba(200,155,91,.55);text-transform:uppercase;line-height:2.4;margin-bottom:44px;">
+    Les Archives révèlent.<br>
+    Vous découvrez ce qu'elles disent de vous.
+  </p>
+
+  <!-- Intro -->
+  <p style="font-family:'Cormorant Garamond',serif;font-size:clamp(15px,2.2vw,18px);color:var(--txs);line-height:1.9;margin-bottom:52px;">
+    Votre dossier ne se résume pas à des données.
+  </p>
+
+  <!-- Cœur émotionnel — plus grand, lumineux -->
+  <div style="margin-bottom:52px;padding:32px 0;border-top:1px solid rgba(200,155,91,.08);border-bottom:1px solid rgba(200,155,91,.08);">
+    <p style="font-family:'Cormorant Garamond',serif;font-size:clamp(18px,2.8vw,24px);font-style:italic;color:var(--tx);line-height:2.4;text-shadow:0 0 40px rgba(200,155,91,.1);">
+      Il révèle l'architecture invisible de votre vie.<br>
+      Il relie les fragments.<br>
+      Il fait apparaître une histoire cohérente.
+    </p>
+  </div>
+
+  <!-- Corps -->
+  <p style="font-family:'Cormorant Garamond',serif;font-size:clamp(14px,2vw,17px);color:var(--txs);line-height:2;margin-bottom:52px;">
+    Chaque dossier est construit à partir de votre architecture astrologique unique.<br><br>
+    Chaque interprétation est relue, enrichie et organisée avec soin.<br><br>
+    Aucun dossier ne ressemble à un autre.
+  </p>
+
+  <!-- Conclusion isolée -->
+  <div style="padding-top:32px;border-top:1px solid rgba(200,155,91,.07);">
+    <p style="font-family:'Cinzel',serif;font-size:clamp(11px,1.6vw,14px);letter-spacing:4px;color:rgba(200,155,91,.55);text-transform:uppercase;line-height:1.8;">
+      Parce qu'aucune vie<br>ne se ressemble.
+    </p>
+  </div>
+</div>
+
+<!-- ══ LIEU 4 — LES ARCHIVES SONT OUVERTES ══ -->
+<section id="lieu4" class="s-fade">
+  <div class="l4-bg"></div>
+  <div class="l4-bg-ov"></div>
+  <div class="l4-inner reveal" id="l4inner">
+    <div class="l4-eyebrow">Les Archives sont Ouvertes</div>
+    <div style="font-family:'Cormorant SC',serif;font-size:6px;letter-spacing:4px;color:rgba(200,155,91,.2);text-transform:uppercase;text-align:center;margin-top:-10px;margin-bottom:8px;">Troisième Salle</div>
+    <h2 class="l4-title">Les Archives<br>Sont Ouvertes</h2>
+    <!-- Citation cérémoniale -->
+    <div style="margin:0 auto 32px;max-width:520px;text-align:center;padding:20px 0;border-top:1px solid rgba(200,155,91,.08);border-bottom:1px solid rgba(200,155,91,.08);">
+      <p style="font-family:'Cormorant Garamond',serif;font-size:clamp(15px,2.2vw,18px);font-style:italic;color:var(--txs);line-height:1.9;">
+        Ce que vous avez confié aux Archives<br>
+        n'est pas une simple inscription.<br>
+        <span style="color:var(--gh);font-style:normal;font-family:'Cormorant SC',serif;font-size:.85em;letter-spacing:2px;">C'est un engagement.</span>
+      </p>
+    </div>
+    <p class="l4-intro" style="font-size:clamp(14px,1.9vw,16px);color:var(--txd);font-style:italic;">Les informations confiées aux Archives<br>commencent déjà à révéler leur architecture.</p>
+    <!-- Registre manuscrit -->
+    <div style="border:1px solid rgba(200,155,91,.12);padding:28px 26px;background:rgba(200,155,91,.02);margin-bottom:22px;position:relative;">
+      <div style="position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(to right,transparent,rgba(200,155,91,.3),transparent);"></div>
+      <div style="font-family:'Cormorant SC',serif;font-size:7px;letter-spacing:5px;color:rgba(200,155,91,.38);text-transform:uppercase;text-align:center;margin-bottom:22px;">Au cours des prochaines heures</div>
+      <div style="display:flex;flex-direction:column;gap:0;max-width:480px;margin:0 auto;">
+        <div style="display:flex;align-items:center;justify-content:center;gap:16px;padding:14px 0;border-bottom:1px solid rgba(200,155,91,.06);font-family:'Cormorant Garamond',serif;font-size:clamp(14px,2vw,16px);color:var(--txs);line-height:1.5;">
+          <span style="font-family:'Cinzel',serif;font-size:8px;color:rgba(200,155,91,.3);flex-shrink:0;letter-spacing:1px;">I</span>
+          Votre Code Source Principal
+        </div>
+        <div style="display:flex;align-items:center;justify-content:center;gap:16px;padding:14px 0;border-bottom:1px solid rgba(200,155,91,.06);font-family:'Cormorant Garamond',serif;font-size:clamp(14px,2vw,16px);color:var(--txs);line-height:1.5;">
+          <span style="font-family:'Cinzel',serif;font-size:8px;color:rgba(200,155,91,.3);flex-shrink:0;letter-spacing:1px;">II</span>
+          Votre Fracture Dominante
+        </div>
+        <div style="display:flex;align-items:center;justify-content:center;gap:16px;padding:14px 0;border-bottom:1px solid rgba(200,155,91,.06);font-family:'Cormorant Garamond',serif;font-size:clamp(14px,2vw,16px);color:var(--txs);line-height:1.5;">
+          <span style="font-family:'Cinzel',serif;font-size:8px;color:rgba(200,155,91,.3);flex-shrink:0;letter-spacing:1px;">III</span>
+          Vos Schémas Inconscients
+        </div>
+        <div style="display:flex;align-items:center;justify-content:center;gap:16px;padding:14px 0;border-bottom:1px solid rgba(200,155,91,.06);font-family:'Cormorant Garamond',serif;font-size:clamp(14px,2vw,16px);color:var(--txs);line-height:1.5;">
+          <span style="font-family:'Cinzel',serif;font-size:8px;color:rgba(200,155,91,.3);flex-shrink:0;letter-spacing:1px;">IV</span>
+          Votre Contrat d'Âme
+        </div>
+        <div style="display:flex;align-items:center;justify-content:center;gap:16px;padding:14px 0;border-bottom:1px solid rgba(200,155,91,.06);font-family:'Cormorant Garamond',serif;font-size:clamp(14px,2vw,16px);color:var(--txs);line-height:1.5;">
+          <span style="font-family:'Cinzel',serif;font-size:8px;color:rgba(200,155,91,.3);flex-shrink:0;letter-spacing:1px;">V</span>
+          Votre Mission de Vie
+        </div>
+        <div style="display:flex;align-items:baseline;gap:14px;padding:10px 0;font-family:'Cormorant Garamond',serif;font-size:clamp(14px,2vw,16px);color:var(--txs);line-height:1.5;">
+          <span style="font-family:'Cinzel',serif;font-size:8px;color:rgba(200,155,91,.3);flex-shrink:0;letter-spacing:1px;">VI</span>
+          Les Dynamiques qui influencent votre trajectoire
+        </div>
+      </div>
+    </div>
+    <!-- Délai mis en valeur -->
+    <div style="border:1px solid rgba(200,155,91,.18);border-top:none;padding:22px 26px;background:rgba(200,155,91,.025);margin-bottom:22px;position:relative;text-align:center;">
+      <div style="position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(to right,transparent,rgba(200,155,91,.45),transparent);"></div>
+      <div style="font-family:'Cormorant SC',serif;font-size:7px;letter-spacing:5px;color:rgba(200,155,91,.4);text-transform:uppercase;margin-bottom:8px;">Délai de Livraison</div>
+      <div style="font-family:'Cinzel',serif;font-size:clamp(24px,4vw,36px);letter-spacing:4px;color:var(--gh);line-height:1;text-shadow:0 0 40px rgba(200,155,91,.18);margin-bottom:10px;">24 à 72 heures</div>
+      <div style="font-family:'Cormorant Garamond',serif;font-size:13.5px;font-style:italic;color:var(--txd);line-height:1.7;">Vous recevrez votre dossier complet directement<br>à votre adresse e-mail dès que l'analyse sera terminée.</div>
+    </div>
+    <div class="l4-final" style="padding:20px 0;border-top:1px solid rgba(200,155,91,.07);border-bottom:none;">
+  Les Archives poursuivent désormais leur travail.<br>
+  <em>Restez ouvert(e) à ce que vous pourriez découvrir.</em>
+</div>
+  </div>
+</section>
+
+<!-- SÉPARATEUR -->
+<div class="sep">
+  <div class="sep-icon">
+    <svg width="36" height="36" viewBox="0 0 80 80" fill="none"><circle cx="40" cy="40" r="35" stroke="rgba(200,155,91,.2)" stroke-width=".8"/><circle cx="40" cy="27" r="9" stroke="rgba(200,155,91,.38)" stroke-width="1" fill="rgba(200,155,91,.05)"/><circle cx="40" cy="27" r="4" stroke="rgba(200,155,91,.22)" stroke-width=".7" fill="none"/><circle cx="40" cy="27" r="1.5" fill="rgba(200,155,91,.4)"/><line x1="40" y1="36" x2="40" y2="62" stroke="rgba(200,155,91,.48)" stroke-width="1.8"/><line x1="40" y1="46" x2="46" y2="46" stroke="rgba(200,155,91,.4)" stroke-width="1.4"/><line x1="40" y1="54" x2="46" y2="54" stroke="rgba(200,155,91,.36)" stroke-width="1.3"/><path d="M37,62 L40,69 L43,62Z" fill="rgba(200,155,91,.4)"/></svg>
+  </div>
+</div>
+
+<!-- ══ LIEU 5 — DALLE + INVESTISSEMENT + DÉTAILS ══ -->
+<section id="lieu5">
+
+  <!-- En-tête -->
+  <div class="l5-header reveal" id="l5header">
+    <div class="l5-eyebrow">Les Archives vous confient</div>
+    <p class="l5-phrase">Ce que vous recevrez n'est pas un simple document.<br><em>Ce sont douze fragments de votre histoire.</em></p>
+  </div>
+
+  <!-- Dalle gravée -->
+  <div class="l5-dalle reveal" id="l5dalle">
+    <div class="l5-dalle-fade-t"></div>
+    <div class="l5-dalle-fade-b"></div>
+    <picture>
+      <source srcset="img-dalle.webp" type="image/webp">
+      <img src="img-dalle.jpg" alt="Les douze révélations gravées dans la pierre" loading="lazy" decoding="async">
+    </picture>
+  </div>
+
+  <!-- Investissement -->
+  <div class="l5-invest reveal" id="l5invest">
+    <div class="l5-invest-wrap">
+      <div class="c1"></div><div class="c2"></div><div class="c3"></div><div class="c4"></div>
+      <div class="l5-invest-lbl" style="margin-bottom:20px;">Investissement</div>
+
+      <!-- Prix majestueux -->
+      <div class="l5-invest-price" style="margin-bottom:4px;"><span class="l5-invest-currency">€</span>137</div>
+
+      <div class="l5-invest-sep" style="margin:24px 0;"><span>✦</span></div>
+
+      <!-- Révélations — chaque phrase vit seule -->
+      <div style="font-family:'Cormorant Garamond',serif;font-size:clamp(12px,1.6vw,13.5px);font-style:italic;color:rgba(200,155,91,.4);letter-spacing:2px;margin-bottom:6px;">Le nombre n'a pas été choisi au hasard.</div>
+
+      <div style="display:flex;flex-direction:column;gap:0;margin:28px 0 36px;">
+        <div style="font-family:'Cinzel',serif;font-size:clamp(11px,1.7vw,14px);letter-spacing:6px;color:rgba(200,155,91,.7);text-transform:uppercase;padding:14px 0;border-bottom:1px solid rgba(200,155,91,.07);">137 Fragments.</div>
+        <div style="font-family:'Cinzel',serif;font-size:clamp(11px,1.7vw,14px);letter-spacing:6px;color:rgba(200,155,91,.6);text-transform:uppercase;padding:14px 0;border-bottom:1px solid rgba(200,155,91,.07);">Une Conscience.</div>
+        <div style="font-family:'Cinzel',serif;font-size:clamp(11px,1.7vw,14px);letter-spacing:6px;color:rgba(200,155,91,.6);text-transform:uppercase;padding:14px 0;border-bottom:1px solid rgba(200,155,91,.07);">Un Dossier.</div>
+        <div style="font-family:'Cinzel',serif;font-size:clamp(11px,1.7vw,14px);letter-spacing:6px;color:rgba(200,155,91,.55);text-transform:uppercase;padding:10px 0;">Une Seule Lecture.</div>
+      </div>
+
+      <div class="l5-invest-sep" style="margin-bottom:24px;"><span>✦</span></div>
+
+      <!-- Sceau de livraison -->
+      <div style="display:flex;flex-direction:column;gap:4px;">
+        <div style="font-family:'Cinzel',serif;font-size:clamp(9px,1.4vw,11px);letter-spacing:6px;color:rgba(200,155,91,.5);text-transform:uppercase;line-height:2.2;">Livraison Privée</div>
+        <div style="font-family:'Cinzel',serif;font-size:clamp(9px,1.4vw,11px);letter-spacing:6px;color:rgba(200,155,91,.45);text-transform:uppercase;line-height:2.2;">par E-mail</div>
+        <div style="font-family:'Cinzel',serif;font-size:clamp(9px,1.4vw,11px);letter-spacing:6px;color:rgba(200,155,91,.4);text-transform:uppercase;line-height:2.2;">sous 24 à 72 heures.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Chaque détail compte -->
+  <div class="l5-details reveal" id="l5details">
+    <div class="l5-det-title">Chaque détail compte</div>
+
+    <div class="l5-det-item">
+      <div class="l5-det-ico">
+        <svg width="20" height="20" viewBox="0 0 50 50" fill="none"><rect x="5" y="4" width="40" height="42" rx="2" fill="none" stroke="rgba(200,155,91,.45)" stroke-width="1.2"/><line x1="12" y1="16" x2="38" y2="16" stroke="rgba(200,155,91,.28)" stroke-width=".8"/><line x1="12" y1="23" x2="38" y2="23" stroke="rgba(200,155,91,.2)" stroke-width=".7"/><circle cx="25" cy="35" r="6" stroke="rgba(200,155,91,.38)" stroke-width=".9" fill="none"/><path d="M22,35 L24,37 L28,32" stroke="rgba(200,155,91,.55)" stroke-width="1.1" fill="none" stroke-linecap="round"/></svg>
+      </div>
+      <div class="l5-det-body">
+        <div class="l5-det-name">La date de naissance</div>
+        <div class="l5-det-desc">Elle révèle la position exacte de chaque planète et astéroïde au moment de votre naissance. C'est la fondation de toute l'analyse.</div>
+      </div>
+    </div>
+
+    <div class="l5-det-item">
+      <div class="l5-det-ico">
+        <svg width="20" height="20" viewBox="0 0 50 50" fill="none"><circle cx="25" cy="25" r="20" stroke="rgba(200,155,91,.4)" stroke-width="1.1" fill="none"/><line x1="25" y1="5" x2="25" y2="12" stroke="rgba(200,155,91,.45)" stroke-width="1.2"/><line x1="25" y1="38" x2="25" y2="45" stroke="rgba(200,155,91,.3)" stroke-width=".9"/><path d="M25,25 L35,18" stroke="rgba(200,155,91,.55)" stroke-width="1.3" stroke-linecap="round"/><path d="M25,25 L20,32" stroke="rgba(200,155,91,.38)" stroke-width="1" stroke-linecap="round"/><circle cx="25" cy="25" r="2" fill="rgba(200,155,91,.5)"/></svg>
+      </div>
+      <div class="l5-det-body">
+        <div class="l5-det-name">L'heure de naissance</div>
+        <div class="l5-det-desc">Elle détermine votre Ascendant et la position précise des maisons astrologiques. Sans elle, une part essentielle de l'architecture reste voilée. Si elle est inconnue, indiquez 12:00.</div>
+      </div>
+    </div>
+
+    <div class="l5-det-item">
+      <div class="l5-det-ico">
+        <svg width="20" height="20" viewBox="0 0 50 50" fill="none"><path d="M25,5 Q38,16 38,28 A13,13 0 1 1 12,28 Q12,16 25,5Z" stroke="rgba(200,155,91,.42)" stroke-width="1.1" fill="rgba(200,155,91,.04)"/><circle cx="25" cy="28" r="4" stroke="rgba(200,155,91,.45)" stroke-width=".9" fill="rgba(200,155,91,.08)"/><line x1="25" y1="32" x2="25" y2="38" stroke="rgba(200,155,91,.38)" stroke-width="1"/><path d="M22,38 L25,44 L28,38Z" fill="rgba(200,155,91,.38)"/></svg>
+      </div>
+      <div class="l5-det-body">
+        <div class="l5-det-name">La ville de naissance</div>
+        <div class="l5-det-desc">Elle affine les coordonnées géographiques nécessaires au calcul précis des positions célestes. Chaque ville produit une architecture légèrement différente.</div>
+      </div>
+    </div>
+  </div>
+
+</section>
+
+<!-- SÉPARATEUR -->
+<div class="sep">
+  <div class="sep-icon">
+    <svg width="36" height="36" viewBox="0 0 80 80" fill="none"><circle cx="40" cy="40" r="35" stroke="rgba(200,155,91,.2)" stroke-width=".8"/><circle cx="40" cy="40" r="25" stroke="rgba(200,155,91,.1)" stroke-width=".5"/><path d="M22,22 L40,15 L58,22 L58,42 Q58,58 40,65 Q22,58 22,42Z" stroke="rgba(200,155,91,.25)" stroke-width=".8" fill="rgba(200,155,91,.03)"/><path d="M30,38 L37,45 L52,30" stroke="rgba(200,155,91,.45)" stroke-width="1.2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  </div>
+</div>
+
+<!-- ══ LIEU 6 — FORMULAIRE ══ -->
+<section id="lieu6">
+  <div class="l6-porte reveal" id="l6porte">
+    <img src="img-porte-sacree.jpg" alt="La Porte du Scriptorium" loading="lazy" decoding="async">
+    <div class="l6-porte-ov"></div>
+    <div class="l6-porte-quote">
+      <p class="l6-pq">"La porte s'ouvre pour ceux qui osent<br>regarder ce qui est écrit dans leur âme."</p>
+    </div>
+  </div>
+  <div class="l6-form-section">
+    <div class="l6-form-inner">
+      <div class="l6-form-lieu">✦ &nbsp; La Salle d'Accès &nbsp; ✦</div>
+      <div class="l6-form-title">Registre des Archives</div>
+      <div class="l6-form-sub" style="font-size:12.5px;letter-spacing:.5px;">Inscrivez vos coordonnées dans les Archives pour accéder à votre dossier.</div>
+      <!-- Ornement manuscrit -->
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:28px;">
+        <div style="flex:1;height:1px;background:linear-gradient(to right,transparent,rgba(200,155,91,.18));"></div>
+        <svg width="18" height="18" viewBox="0 0 40 40" fill="none"><path d="M20,4 Q28,10 28,20 Q28,34 20,36 Q12,34 12,20 Q12,10 20,4Z" stroke="rgba(200,155,91,.3)" stroke-width=".8" fill="rgba(200,155,91,.04)"/><path d="M16,16 L24,24 M24,16 L16,24" stroke="rgba(200,155,91,.2)" stroke-width=".7"/></svg>
+        <div style="flex:1;height:1px;background:linear-gradient(to left,transparent,rgba(200,155,91,.18));"></div>
+      </div>
+      <div class="fg" id="mainForm">
+        <div class="frow"><label class="flbl" for="f-prenom">Prénom</label><input id="f-prenom" type="text" class="finp" placeholder="Votre prénom" autocomplete="given-name"><div class="f-error" id="err-prenom">Champ requis</div></div>
+        <div class="frow"><label class="flbl" for="f-nom">Nom</label><input id="f-nom" type="text" class="finp" placeholder="Votre nom" autocomplete="family-name"><div class="f-error" id="err-nom">Champ requis</div></div>
+        <div class="frow"><label class="flbl" for="f-email">E-mail</label><input id="f-email" type="email" class="finp" placeholder="Votre adresse e-mail" autocomplete="email" inputmode="email"><div class="f-error" id="err-email">Adresse invalide</div></div>
+        <div class="frow"><label class="flbl" for="f-email2">Confirmer l'E-mail</label><input id="f-email2" type="email" class="finp" placeholder="Confirmer l'adresse e-mail" autocomplete="email" inputmode="email"><div class="f-error" id="err-email2">E-mails différents</div></div>
+        <div class="frow"><label class="flbl" for="f-date">Date de naissance</label><input id="f-date" type="text" class="finp" placeholder="JJ/MM/AAAA" maxlength="10" inputmode="numeric" autocomplete="off"><div class="f-error" id="err-date">Format : JJ/MM/AAAA</div></div>
+        <div class="frow"><label class="flbl" for="f-heure">Heure de naissance</label><input id="f-heure" type="text" class="finp" placeholder="HH:MM" maxlength="5" inputmode="numeric" autocomplete="off"><div class="f-error" id="err-heure">Format : HH:MM</div><div class="f-hint">Si inconnue, indiquez 12:00.</div></div>
+        <div class="frow full"><label class="flbl" for="f-ville">Ville de naissance</label><div class="ville-wrap"><input id="f-ville" type="text" class="finp" placeholder="Ex : Paris, Casablanca, Genève…" autocomplete="off" inputmode="text"><ul id="ville-suggestions"></ul></div><div class="f-error" id="err-ville">Champ requis</div></div>
+        <div class="frow full" id="row-region" style="display:none;"><label class="flbl" for="f-region">Région / Province</label><input id="f-region" type="text" class="finp" placeholder="Ex : Île-de-France…" inputmode="text" autocomplete="off"><div class="f-hint">Optionnel.</div></div>
+        <div class="frow full"><label class="flbl" for="f-pays">Pays de naissance</label>
+          <select id="f-pays" class="finp">
+            <option value="" disabled selected>Sélectionnez votre pays</option>
+            <option>France</option><option>Belgique</option><option>Suisse</option><option>Canada</option><option>Luxembourg</option><option>Maroc</option><option>Algérie</option><option>Tunisie</option><option>Sénégal</option><option>Côte d'Ivoire</option><option>Madagascar</option><option>Cameroun</option><option>Congo</option><option>Mali</option><option>Réunion</option><option>Martinique</option><option>Guadeloupe</option><option>Royaume-Uni</option><option>Espagne</option><option>Italie</option><option>Portugal</option><option>Allemagne</option><option>États-Unis</option><option>Brésil</option><option>Mexique</option><option>Autre</option>
+          </select>
+          <div class="f-error" id="err-pays">Pays requis</div>
+        </div>
+      </div>
+      <button class="fsubmit" id="f-submit" type="button">
+        <svg width="12" height="13" viewBox="0 0 12 14" fill="rgba(5,3,2,.9)"><path d="M9 6V4a3 3 0 0 0-6 0v2H1v8h10V6H9zm-4 0V4a1 1 0 0 1 2 0v2H5z"/></svg>
+        <span id="f-submit-label">Accéder à Mon Dossier</span>
+      </button>
+      <div class="fsec">
+        <svg width="10" height="11" viewBox="0 0 12 14" fill="rgba(200,155,91,.28)"><path d="M9 6V4a3 3 0 0 0-6 0v2H1v8h10V6H9zm-4 0V4a1 1 0 0 1 2 0v2H5z"/></svg>
+        Vos données sont sécurisées et confidentielles.
+      </div>
+      <div id="f-success">✦ Votre demande a bien été envoyée.<br>Les Archives vont s'ouvrir.<br><span style="font-size:12px;color:var(--txd);">Vous recevrez une confirmation par e-mail sous peu.</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ LIVRE — CONCLUSION ══ -->
+<section id="livre">
+  <div class="livre-glow"></div>
+  <div class="livre-dust" id="livreDust"></div>
+  <div class="livre-wrap">
+    <img id="livreImg" class="livre-img" src="img-livre.png" alt="Votre Livre SOULSCRIPT" loading="lazy" decoding="async">
+  </div>
+  <div class="livre-caption">
+    <div class="livre-cap-title" id="livreCaptionTitle" style="display:none;"></div>
+    <p class="livre-cap-text" id="livreCaptionText" style="display:none;"></p>
+  </div>
+  <div class="devise">
+    <!-- Devise officielle SOULSCRIPT -->
+    <div style="display:flex;align-items:center;gap:16px;margin-bottom:28px;max-width:480px;margin-left:auto;margin-right:auto;">
+      <div style="flex:1;height:1px;background:linear-gradient(to right,transparent,rgba(200,155,91,.3));"></div>
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="rgba(200,155,91,.45)" stroke-width="1"/><circle cx="12" cy="12" r="2.5" fill="rgba(200,155,91,.55)"/></svg>
+      <div style="flex:1;height:1px;background:linear-gradient(to left,transparent,rgba(200,155,91,.3));"></div>
+    </div>
+    <p style="font-family:'Cormorant SC',serif;font-size:clamp(12px,2vw,16px);letter-spacing:4px;color:rgba(200,155,91,.7);line-height:1;margin-bottom:18px;text-shadow:0 0 30px rgba(200,155,91,.15);">
+      Les étoiles tracent les coordonnées.
+    </p>
+    <p style="font-family:'Cormorant SC',serif;font-size:clamp(12px,2vw,16px);letter-spacing:4px;color:rgba(200,155,91,.55);line-height:1;margin-bottom:28px;text-shadow:0 0 30px rgba(200,155,91,.1);">
+      Les Archives révèlent leur signification.
+    </p>
+    <div style="font-family:'Cinzel',serif;font-size:6.5px;letter-spacing:7px;color:rgba(200,155,91,.25);text-transform:uppercase;">SOULSCRIPT · ARCHIVES DE L'ÂME</div>
+  </div>
+</section>
+
+<!-- NAV MOBILE -->
+<nav id="mobnav">
+  <a href="/" class="mn"><span class="mn-ico"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(200,155,91,.6)" stroke-width="1.4"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></span><span class="mn-lbl">Accueil</span></a>
+  <a href="#" class="mn"><span class="mn-ico"><svg width="20" height="20" viewBox="0 0 60 60" fill="none"><path d="M30,8 Q46,14 46,30 Q46,50 30,54 Q14,50 14,30 Q14,14 30,8Z" stroke="rgba(74,158,191,.65)" stroke-width="1.4" fill="rgba(74,158,191,.06)"/><circle cx="30" cy="28" r="5" fill="rgba(74,158,191,.5)"/></svg></span><span class="mn-lbl">Aelys</span></a>
+  <a href="#" class="mn act"><span class="mn-ico"><svg width="22" height="22" viewBox="0 0 60 60" fill="none"><circle cx="30" cy="30" r="27" stroke="rgba(200,155,91,.52)" stroke-width="1.2" fill="rgba(200,155,91,.06)"/><ellipse cx="30" cy="29" rx="13" ry="15" fill="rgba(120,75,25,.18)" stroke="rgba(200,155,91,.32)" stroke-width=".9"/><ellipse cx="24" cy="26" rx="3.2" ry="2.6" fill="rgba(200,155,91,.42)"/><ellipse cx="36" cy="26" rx="3.2" ry="2.6" fill="rgba(200,155,91,.42)"/><ellipse cx="24" cy="26" rx="1.6" ry="2" fill="rgba(10,6,2,.8)"/><ellipse cx="36" cy="26" rx="1.6" ry="2" fill="rgba(10,6,2,.8)"/></svg></span><span class="mn-lbl">Le Lion</span></a>
+  <a href="#" class="mn"><span class="mn-ico"><svg width="20" height="20" viewBox="0 0 60 60" fill="none"><rect x="8" y="6" width="44" height="50" rx="2" fill="rgba(160,113,74,.05)" stroke="rgba(160,113,74,.52)" stroke-width="1.2"/><line x1="8" y1="20" x2="52" y2="20" stroke="rgba(160,113,74,.18)" stroke-width=".8"/></svg></span><span class="mn-lbl">Nessar</span></a>
+  <a href="#" class="mn"><span class="mn-ico"><svg width="20" height="20" viewBox="0 0 60 60" fill="none"><circle cx="30" cy="30" r="25" stroke="rgba(110,168,255,.48)" stroke-width="1.2" fill="rgba(110,168,255,.04)"/><path d="M30,5 L33,27 L30,30 L27,27Z" fill="rgba(110,168,255,.42)"/><circle cx="30" cy="30" r="3" fill="rgba(110,168,255,.52)"/></svg></span><span class="mn-lbl">Oréon</span></a>
+</nav>
+
+<script>
+// ══ BOUTON VIDÉO ══
+(function(){
+  const btn = document.getElementById('heroBtn');
+  if(btn){
+    btn.style.transform = 'translateX(-50%) translateY(12px)';
+    setTimeout(()=>{
+      btn.style.opacity = '1';
+      btn.style.transform = 'translateX(-50%) translateY(0)';
+    }, 1600);
+  }
+})();
+
+// ══ RUNES HALL ══
+(function(){
+  const R=['ᚠ','ᚢ','ᚦ','ᚨ','ᚱ','ᚲ','ᚷ','ᚹ','ᚺ','ᚾ','ᛁ','ᛃ','ᛇ','ᛈ','ᛉ','ᛊ','ᛏ','ᛒ','ᛖ','ᛗ','ᛚ','ᛜ','ᛞ','ᛟ'];
+  const c = document.getElementById('hallRunes');
+  if(!c) return;
+  function mk(){
+    const el = document.createElement('div');
+    el.style.cssText = `position:absolute;font-family:'Cormorant Garamond',serif;font-style:italic;color:rgba(200,155,91,.18);left:${3+Math.random()*94}%;top:${3+Math.random()*90}%;font-size:${11+Math.random()*13}px;animation:dustRise ${9+Math.random()*10}s ease-out ${Math.random()*2}s forwards;pointer-events:none;`;
+    el.style.setProperty('--dx', `${(Math.random()-.5)*40}px`);
+    el.textContent = R[Math.floor(Math.random()*R.length)];
+    c.appendChild(el);
+    setTimeout(()=>el.remove(), 22000);
+  }
+  setInterval(mk, 1400);
+})();
+
+// ══ POUSSIÈRES LIVRE ══
+(function(){
+  const c = document.getElementById('livreDust');
+  if(!c) return;
+  function mk(){
+    const el = document.createElement('div');
+    const size = .7+Math.random()*2;
+    const dur = 4+Math.random()*7;
+    const delay = Math.random()*3;
+    const dx = (Math.random()-.5)*30;
+    el.style.cssText = `position:absolute;width:${size}px;height:${size}px;border-radius:50%;background:rgba(${200+Math.random()*40|0},${150+Math.random()*40|0},${60+Math.random()*40|0},.75);left:${36+Math.random()*28}%;top:${8+Math.random()*38}%;animation:dustRise ${dur}s ease-out ${delay}s forwards;pointer-events:none;`;
+    el.style.setProperty('--dx', `${dx}px`);
+    c.appendChild(el);
+    setTimeout(()=>{ if(el.parentNode) el.remove(); }, (dur+delay)*1000);
+  }
+  // Start after livre reveals
+  const livreImg = document.getElementById('livreImg');
+  const obs = new IntersectionObserver(entries=>{
+    if(entries[0].isIntersecting){ for(let i=0;i<8;i++) setTimeout(mk, i*200+800); obs.disconnect(); }
+  },{threshold:.05});
+  if(livreImg) obs.observe(livreImg);
+})();
+
+// ══ SCROLL REVEAL ══
+(function(){
+  if(window.matchMedia('(pointer:coarse)').matches) window.__noParallax = true;
+
+  const io = new IntersectionObserver(entries=>{
+    entries.forEach(e=>{
+      if(!e.isIntersecting) return;
+      e.target.classList.add('vis');
+      io.unobserve(e.target);
+    });
+  },{threshold:.07, rootMargin:'0px 0px -28px 0px'});
+
+  ['l2card','l3banner','l3header','dalleSection','texteNarratif','l4inner','l5header','l5dalle','l5invest','l5details','l6porte','livreImg','livreCaptionTitle','livreCaptionText'].forEach(id=>{
+    const el = document.getElementById(id);
+    if(el) io.observe(el);
+  });
+  document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+})();
+
+// ══ FORMULAIRE ══
+(function(){
+  // Date
+  const fd = document.getElementById('f-date');
+  if(fd) fd.addEventListener('input',function(){
+    let v=this.value.replace(/\D/g,'');
+    if(v.length>2) v=v.slice(0,2)+'/'+v.slice(2);
+    if(v.length>5) v=v.slice(0,5)+'/'+v.slice(5);
+    this.value=v.slice(0,10);
+    this.classList.remove('invalid');
+    const e=document.getElementById('err-date');if(e)e.style.display='none';
+  });
+  // Heure
+  const fh = document.getElementById('f-heure');
+  if(fh) fh.addEventListener('input',function(){
+    let v=this.value.replace(/\D/g,'');
+    if(v.length>2) v=v.slice(0,2)+':'+v.slice(2);
+    this.value=v.slice(0,5);
+    this.classList.remove('invalid');
+    const e=document.getElementById('err-heure');if(e)e.style.display='none';
+  });
+  // Ville autocomplete
+  const fv=document.getElementById('f-ville');
+  const sugg=document.getElementById('ville-suggestions');
+  const rowR=document.getElementById('row-region');
+  const fR=document.getElementById('f-region');
+  const fP=document.getElementById('f-pays');
+  let vt=null,vd=null;
+  if(fv&&sugg){
+    fv.addEventListener('input',function(){
+      clearTimeout(vt);sugg.style.display='none';sugg.innerHTML='';vd=null;
+      const q=this.value.trim();if(q.length<2)return;
+      vt=setTimeout(()=>{
+        fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(q)}&format=json&addressdetails=1&limit=6`,{headers:{'Accept-Language':'fr'}})
+          .then(r=>r.json()).then(res=>{
+            sugg.innerHTML='';if(!res.length){sugg.style.display='none';return;}
+            res.forEach(item=>{
+              const a=item.address||{};
+              const ville=a.city||a.town||a.village||a.municipality||item.display_name.split(',')[0];
+              const region=a.state||a.region||a.county||'';
+              const pays=a.country||'';
+              const li=document.createElement('li');
+              li.innerHTML=`${ville}<span style="font-size:11px;color:var(--txd);display:block;margin-top:1px;">${region?region+' — ':''}${pays}</span>`;
+              li.addEventListener('mousedown',e=>e.preventDefault());
+              li.addEventListener('click',()=>{
+                fv.value=ville;vd={ville,region,pays,lat:parseFloat(item.lat),lon:parseFloat(item.lon)};
+                if(region&&fR){fR.value=region;rowR.style.display='block';}else{rowR.style.display='none';}
+                if(pays&&fP){for(let o of fP.options){if(o.value.toLowerCase()===pays.toLowerCase()||pays.toLowerCase().includes(o.value.toLowerCase())){fP.value=o.value;break;}}}
+                sugg.style.display='none';fv.classList.remove('invalid');
+                const e=document.getElementById('err-ville');if(e)e.style.display='none';
+              });
+              sugg.appendChild(li);
+            });
+            sugg.style.display='block';
+          }).catch(()=>{sugg.style.display='none';});
+      },350);
+    });
+    document.addEventListener('click',e=>{if(!fv.contains(e.target)&&!sugg.contains(e.target))sugg.style.display='none';});
+  }
+  // Validation + submit
+  function gv(id){return(document.getElementById(id)||{}).value||'';}
+  function se(id){const e=document.getElementById(id);if(e)e.style.display='block';}
+  function he(id){const e=document.getElementById(id);if(e)e.style.display='none';}
+  function si(id){const e=document.getElementById(id);if(e)e.classList.add('invalid');}
+  function ci(id){const e=document.getElementById(id);if(e)e.classList.remove('invalid');}
+  function vDate(d){if(!/^\d{2}\/\d{2}\/\d{4}$/.test(d))return false;const[j,m,a]=d.split('/').map(Number);return m>=1&&m<=12&&j>=1&&j<=31&&a>=1900&&a<=new Date().getFullYear();}
+  function vHeure(h){if(!h)return true;if(!/^\d{2}:\d{2}$/.test(h))return false;const[hh,mm]=h.split(':').map(Number);return hh>=0&&hh<=23&&mm>=0&&mm<=59;}
+
+  const btn=document.getElementById('f-submit');
+  if(!btn)return;
+  btn.addEventListener('click',function(){
+    let ok=true;
+    ['prenom','nom','email','email2','date','ville','pays'].forEach(f=>{he('err-'+f);ci('f-'+f);});
+    he('err-heure');ci('f-heure');
+    ['prenom','nom','email','email2','date','ville','pays'].forEach(f=>{
+      if(!gv('f-'+f).trim()){si('f-'+f);se('err-'+f);ok=false;}
+    });
+    const em=gv('f-email').trim();
+    if(em&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em)){si('f-email');se('err-email');ok=false;}
+    const em2=gv('f-email2').trim();
+    if(em&&em2&&em!==em2){si('f-email2');se('err-email2');ok=false;}
+    const dt=gv('f-date').trim();
+    if(dt&&!vDate(dt)){si('f-date');se('err-date');ok=false;}
+    const hr=gv('f-heure').trim();
+    if(hr&&!vHeure(hr)){si('f-heure');se('err-heure');ok=false;}
+    if(!ok)return;
+    const data={prenom:gv('f-prenom').trim(),nom:gv('f-nom').trim(),email:em,date:dt,heure:hr||'12:00',ville:gv('f-ville').trim(),region:gv('f-region').trim(),pays:gv('f-pays'),lat:vd?vd.lat:null,lon:vd?vd.lon:null,timestamp:new Date().toISOString()};
+    const lbl=document.getElementById('f-submit-label');
+    btn.style.opacity='.6';btn.style.pointerEvents='none';
+    if(lbl)lbl.textContent='Envoi en cours…';
+    fetch('/.netlify/functions/natal-chart',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)})
+      .then(r=>{if(!r.ok)throw new Error();return r.json();})
+      .then(()=>showOk())
+      .catch(()=>{btn.style.opacity='1';btn.style.pointerEvents='auto';if(lbl)lbl.textContent='Accéder à Mon Dossier';showOk();});
+  });
+  function showOk(){
+    const f=document.getElementById('mainForm');const b=document.getElementById('f-submit');const s=document.querySelector('.fsec');const ok=document.getElementById('f-success');
+    if(f)f.style.display='none';if(b)b.style.display='none';if(s)s.style.display='none';if(ok)ok.style.display='block';
+  }
+  document.querySelectorAll('.finp').forEach(inp=>{
+    inp.addEventListener('input',function(){
+      this.classList.remove('invalid');
+      const id=this.id.replace('f-','');
+      he('err-'+id);
+    });
+  });
+})();
+</script>
+</body>
+</html>
